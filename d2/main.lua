@@ -1,119 +1,107 @@
-local function cwd()
-    local str = debug.getinfo(2, "S").source:sub(2)
-
-    return str:match("(.*/)")
-end
-
-local function file_exists(file)
-    local f = io.open(file, "rb")
-
-    if f then f:close() end
-    return f ~= nil
-end
-
-local function lines_from(file)
-    if not file_exists(file) then return {} end
-    local lines = {}
-
-    for line in io.lines(file) do
-        lines[#lines + 1] = line
-    end
-    return lines
-end
-
-local function distance(n1, n2)
-    local threshold = 3
-    local distance = math.abs(n1 - n2)
-
-    if distance > 0 and distance <= threshold then
-        return n1 - n2
-    end
-end
+local fileutils = require("lib.fileutils")
+local mathutils = require("lib.mathutils")
 
 local function analyze_line(line)
-    local t = {} -- store för nummer i raden
-    local str = ""
-
     local previous = nil
     local increasing = nil
-    local safe = nil
+    local safe = true
+    local numbers = {}
+
+    -- print(string.format("Got line %s", line))
 
     for n in line:gmatch("%d+") do
-        n = tonumber(n)
+        table.insert( numbers, tonumber(n) )
+    end
+
+    for i = 1, #numbers do
+        n = numbers[i]
         if previous == nil then
             previous = n
             goto continue
         end
 
-        local distance = distance(previous, n)
+        local valid = mathutils.check_distance(previous, n, {1, 3})
 
-        if distance then
-            if increasing == nil and n > previous then
-                -- print(string.format("Increasing"))
-                increasing = true
-            elseif increasing == nil and n < previous then
-                -- print("Decreasing")
-                increasing = false
-            end
-
-            if increasing == true and n < previous then
-                -- print(string.format("Error. Is increasing and %d < %d", n, previous))
-                safe = false
-                break
-            elseif increasing == false and n > previous then
-                -- print(string.format("Error. Is decreasing and %d > %d", n, previous))
-                safe = false
-                break
-            elseif n == previous then
-                safe = false
-                break
-            else
-                safe = true
-            end
-        else
-            -- print(string.format("Error! Distance is %d", math.abs(n - previous)))
+        if not valid then
             safe = false
             break
+        else
+            if increasing == nil then
+                increasing = n > previous
+            elseif (increasing and n < previous) or (not increasing and n > previous) then
+                safe = false
+                break
+            end
         end
 
         previous = n
-
         ::continue::
     end
 
-    -- print(string.format("Line: %s, Safe: %s", line, safe))
-
+    -- print(string.format("Line: %s\t\t\tSafe: %s", line, safe)) -- funkar för part 1
     return safe
 end
 
+local function analyze_with_removal(line)
+    local numbers = {}
+    for n in line:gmatch("%d+") do
+        table.insert(numbers, tonumber(n))
+    end
+
+    for i = 1, #numbers do
+        local test_numbers = ""
+        for j = 1, #numbers do
+            if i ~= j then
+                test_numbers = test_numbers .. " " .. numbers[j]
+            end
+        end
+
+        if analyze_line(test_numbers) then
+            return true
+        end
+    end
+    return false
+end
+
 local function main()
-    local path = cwd() or ""
+    local path = fileutils.cwd() or ""
     local file = path .. 'input.txt'
-    if not file_exists(file) then
+    if not fileutils.file_exists(file) then
         print("file not found!")
         return
     end
-    local lines = lines_from(file)
+    local lines = fileutils.lines_from(file)
     local safe = 0
 
-    local i = 0
+    local part1safe = 0
+    local part2safe = 0
 
-    -- lines = {
-    --     "7 6 4 2 1",
-    --     "1 2 7 8 9",
-    --     "9 7 6 2 1",
-    --     "1 3 2 4 5",
-    --     "8 6 4 4 1",
-    --     "1 3 6 7 9"
-    -- }
+    -- control
+    local control_lines = {
+        "7 6 4 2 1", -- p1 safe,   p2 safe
+        "1 2 7 8 9", -- p1 unsafe, p2 unsafe
+        "9 7 6 2 1", -- p1 unsafe, p2 unsafe
+        "1 3 2 4 5", -- p1 unsafe, p2 safe (removes 3)
+        "8 6 4 4 1", -- p1 unsafe, p2 safe (removes 4)
+        "1 3 6 7 9"  -- p1 safe,   p2 safe
+    }
 
+    -- print("Part 1")
     for _,l in pairs(lines) do
-        if analyze_line(l) then
-            i = i + 1
+        if analyze_line(l, 0) then
+            part1safe = part1safe + 1
         end
     end
 
-    print(string.format("Safe lines: %d", i))
+    -- print(string.format("\nPart 2"))
+    for _,l in pairs(lines) do
+        if analyze_with_removal(l) then
+            part2safe = part2safe + 1
+        end
+    end
+
+    print(string.format("\nPart 1: Safe lines: %d", part1safe))
+    print(string.format("Part 2: Safe lines: %d", part2safe))
 end
 
 main()
