@@ -1,10 +1,12 @@
 local function cwd()
     local str = debug.getinfo(2, "S").source:sub(2)
+
     return str:match("(.*/)")
 end
 
 local function file_exists(file)
     local f = io.open(file, "rb")
+
     if f then f:close() end
     return f ~= nil
 end
@@ -12,6 +14,7 @@ end
 local function lines_from(file)
     if not file_exists(file) then return {} end
     local lines = {}
+
     for line in io.lines(file) do
         lines[#lines + 1] = line
     end
@@ -19,8 +22,8 @@ local function lines_from(file)
 end
 
 local function compare_sizes(arr1, arr2)
-    sz1 = #arr1
-    sz2 = #arr2
+    local sz1 = #arr1
+    local sz2 = #arr2
 
     if sz1 == sz2 then
         return true
@@ -31,6 +34,7 @@ end
 
 local function getDistance(arr1, arr2)
     local sum = 0
+
     for k,v in ipairs(arr1) do
         local distance = math.abs(v - arr2[k])
         sum = sum + distance
@@ -106,8 +110,6 @@ local function main()
         print(string.format("Total distance is:\t%d", total))
         print(string.format("Similarity score is:\t%d", similarity))
     end
-
-
 end
 
 main()
