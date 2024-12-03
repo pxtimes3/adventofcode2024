@@ -88,7 +88,7 @@ local function main()
 
     -- print("Part 1")
     for _,l in pairs(lines) do
-        if analyze_line(l, 0) then
+        if analyze_line(l) then
             part1safe = part1safe + 1
         end
     end
@@ -100,7 +100,7 @@ local function main()
         end
     end
 
-    print(string.format("\nPart 1: Safe lines: %d", part1safe))
+    print(string.format("Part 1: Safe lines: %d", part1safe))
     print(string.format("Part 2: Safe lines: %d", part2safe))
 end
 
