@@ -23,30 +23,30 @@ local function is_valid(x, y)
 end
 
 local function check_neighbors(x, y, currentSeqPos, direction, found)
-    if currentSeqPos == 1 and matrix[y][x] ~= 'X' then
-        return false
-    end
+	if currentSeqPos == 1 and matrix[y][x] ~= 'X' then
+		return false
+	end
 
-    if currentSeqPos >= #sequence then
-        local key = x..","..y..","..direction[1]..","..direction[2]
-        if not found[key] then
-            found[key] = true
-            return true
-        end
-        return false
-    end
+	if currentSeqPos >= #sequence then
+		local key = x..","..y..","..direction[1]..","..direction[2]
+		if not found[key] then
+			found[key] = true
+			return true
+		end
+		return false
+	end
 
-    local newX = x + direction[1]
-    local newY = y + direction[2]
-    
-    if is_valid(newX, newY) then
-        local nextExpected = string.sub(sequence, currentSeqPos + 1, currentSeqPos + 1)
-        if matrix[newY][newX] == nextExpected then
-            return check_neighbors(newX, newY, currentSeqPos + 1, direction, found)
-        end
-    end
-    
-    return false
+	local newX = x + direction[1]
+	local newY = y + direction[2]
+	
+	if is_valid(newX, newY) then
+		local nextExpected = string.sub(sequence, currentSeqPos + 1, currentSeqPos + 1)
+		if matrix[newY][newX] == nextExpected then
+			return check_neighbors(newX, newY, currentSeqPos + 1, direction, found)
+		end
+	end
+	
+	return false
 end
 
 local function find_sequences()
@@ -64,7 +64,7 @@ local function find_sequences()
 		{-1,-1}  -- up-left
 	}
 
-    -- for for for eller for for lamm? >_<
+	-- for for for eller for for lamm? >_<
 	for y = 1, #matrix do
 		for x = 1, #matrix[1] do
 			if matrix[y][x] == 'X' then
@@ -82,35 +82,35 @@ end
 
 
 local function print_matrix()
-    print("Matrix contents:")
-    for y = 1, #matrix do
-        local line = ""
-        for x = 1, #matrix[y] do
-            line = line .. matrix[y][x] .. " "
-        end
-        print(line)
-    end
-    print("Matrix dimensions:", #matrix, "rows x", #matrix[1], "columns")
+	print("Matrix contents:")
+	for y = 1, #matrix do
+		local line = ""
+		for x = 1, #matrix[y] do
+			line = line .. matrix[y][x] .. " "
+		end
+		print(line)
+	end
+	print("Matrix dimensions:", #matrix, "rows x", #matrix[1], "columns")
 end
 
 
 local function main()
-    local wp = fu.cwd()
-    local lines = fu.open_file(wp .. './input.txt')
+	local wp = fu.cwd()
+	local lines = fu.open_file(wp .. './input.txt')
 
-    for x in pairs(lines) do
-        local row = {}
-        for i = 1, #lines[x] do
-            local char = string.sub(lines[x], i, i)
-            table.insert(row, i, char)
-        end
-        table.insert(matrix, x, row)
-    end
+	for x in pairs(lines) do
+		local row = {}
+		for i = 1, #lines[x] do
+			local char = string.sub(lines[x], i, i)
+			table.insert(row, i, char)
+		end
+		table.insert(matrix, x, row)
+	end
 
-    -- print_matrix()
-    -- print(string.format("Matrix rows: %d", #matrix))
-    
-    find_sequences()
+	-- print_matrix()
+	-- print(string.format("Matrix rows: %d", #matrix))
+	
+	find_sequences()
 end
 
 main()
