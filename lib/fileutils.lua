@@ -40,4 +40,22 @@ function fileutils.lines_from(file)
     return lines
 end
 
+
+--[[
+Opens a file from the specified path relative to the current working directory.
+
+@param path string: Relative path to the file to open.
+
+@return table: A table containing each line of the file as a separate element.
+               Exits the program with status 127 if the file does not exist.
+]]
+function fileutils.open_file(path)
+    if not fileutils.file_exists(path) then
+        print(string.format("File %s does not exist!?", path))
+        os.exit(127)
+    else
+        return fileutils.lines_from(path)
+    end
+end
+
 return fileutils
